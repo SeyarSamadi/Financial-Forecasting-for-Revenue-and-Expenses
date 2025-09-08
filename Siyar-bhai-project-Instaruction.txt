@@ -1,0 +1,368 @@
+Create a forder 
+
+open this folder in vs code and create "main.ipynb" file
+
+Create a MARKDOWN cell "### Loading Libraries" press ESC
+
+
+Run this command in terminal to install all the libraries which we are going to use init 
+
+Create a CODE cell and import this libraries
+
+-> import pandas as pd
+-> import numpy as np
+-> import prophet
+-> from prophet import Prophet
+-> import matplotlib.pyplot as plt
+-> import seaborn as sns
+-> import yfinance as yf
+-> print("All libraries imported successfully!") 
+
+============================================================================================================
+
+Create a new git repo named called "Financial-Forecasting-for-Revenue-and-Expenses" press ESC
+
+make sure it is publc 
+Do not add "Readme file"
+
+after this u get the some command 
+
+copy one line from command and run it in vs code terminal 
+same as all commands 
+
+after this refresh your GitHub u get your project in GitHub 
+
+================================================================================================================
+
+
+Create a MARKDOWN cell "### Get Data from EDGAR using edgartool package" press ESC
+
+
+ticker = yf.Ticker("AAPL")
+financials = ticker.quarterly_financials.T  # Get quarterly data
+financials.to_csv("apple_quarterly_financials.csv")
+print(financials.head())
+
+# in this we are using Yahoo finance website and extracting AAPL data from it , AAPL stand for Apple company ,  u can change this code if u want , and finaly we are saving it in csv format , u can modify this code if u want , or u can continue same as this 
+
+
+===========================================================================================================
+
+Create a MARKDOWN cell "### Cleaning & Modeling Dataset " press ESC
+
+Create CODE cell and paste this code in it and try to understand thic code , if u want uu can write yourself to get experance how u can tackle with this type of program , make sure do not make SPELLING mistake , everytimes
+
+
+
+df = pd.read_csv("apple_quarterly_financials.csv")
+df = df.rename(columns={'Unnamed: 0' : 'Date'})  # Renaming the unnames : 0 TO Date
+df['Date'] = pd.to_datetime(df['Date']) # Converting Date column to datetime
+
+# Keep only Data [Date , Revenue , Expensexs]
+df = df[['Date', 'Total Revenue', 'Operating Expense']]	
+
+#Simplyfing columns names 
+df.columns = ['Date' , 'Revenue' , 'Expenses']
+
+# Converting to Millions for readability
+df['Revenue'] = df['Revenue'] / 1000000
+df['Expenses'] = df['Expenses'] / 1000000
+
+# Checking Missing value in dataset
+print("Missing Value :\n" ,df.isnull().sum())
+
+# Filling missing value with privious value if null exists
+#df.fillna(method='ffill' , inplace=True)
+
+# Rewmoving negative Values
+df = df[df['Revenue'] > 0]
+df = df[df['Expenses'] > 0]
+
+#Sorting by date
+df = df.sort_values('Date')
+
+df.to_csv("cleaned_financials.csv", index=False)
+print("Cleaned data:\n", df.head())
+
+
+
+
+After this u get a cleaned and structed datse , we are saving this data set so u have 3 files in your left side 
+1 : apple_quarterly_financials.csv
+2 : cleaned_financials.csv
+3 : main.ipynb
+
+
+next push this work in GitHub 
+
+run command in terminal  
+
+git add .
+git commit -m "your message what u have done yet"
+git push -u origin main
+
+
+Now have your recent work in GitHub 
+
+
+===========================================================================================================================
+Create a NEW FOLDER "Visuals"
+
+Create MARKDOWN cell "### Plotting Revenue and Expenses" Press ESC
+
+Create Code Cell and Paste or type your self this code in code cell 
+
+df = pd.read_csv("cleaned_financials.csv")
+df['Date'] = pd.to_datetime(df['Date'])
+ 
+
+plt.figure(figsize=(10, 6))
+sns.lineplot(data = df , x ='Date' , y='Revenue' , label = 'Revenue ($M)')
+sns.lineplot(data = df , x='Date'  , y='Expenses' , label='Expenses ($M)')
+plt.title("Apple Revenue and Expenses (2024 - 2025)")
+plt.xticks(rotation=45)
+plt.savefig("Visuals/apple_revenue_expenses.png")
+plt.show()
+
+
+u get a very beautiful graph and u have save this graph in visual folders  , now push this work in GitHub 
+
+
+run command in terminal  
+
+git add .
+git commit -m "your message what u have done yet"
+git push -u origin main
+
+
+================================================================================================================================
+
+Create MarkDOWN Cell "### Plotting Revenuwe By Quater" Press ESC
+
+Creater Code Cell and paste or type by your self this code init 
+
+
+df['Quarter'] = df['Date'].dt.quarter
+sns.boxplot(x='Quarter' , y='Revenue' , data=df)
+plt.title("Revenue By Quater")
+plt.savefig("Visuals/revenue_by_quarter.png")
+plt.show()
+
+
+
+u get a verf beautiful graph and save it in Visuals Folder 
+
+NOW push this work in GitHub , and this time i will not tell u how to push this work , u have prior knowledge ho to push 
+
+
+======================================================================================================================================
+
+
+Create MARKDOWN cell and paste this 
+
+### Forecast with Prophet
+#### What to Do: Predict revenue and expenses for the next 8 quarters (2 years) using Prophet.
+#### Why: Forecasting shows you can predict future trends, a must for The Algebra Group company.
+
+Press ESC
+
+Paste thi code or type by yourself
+
+
+
+# Prepare data for Prophet
+revenue_df = df[['Date', 'Revenue']].rename(columns={'Date': 'ds', 'Revenue': 'y'})
+
+# Train model
+model = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
+model.fit(revenue_df)
+
+# Forcating for 2years
+future = model.make_future_dataframe(periods=8 , freq = 'Q')
+forecast = model.predict(future)
+
+# Save Forcast in csv
+forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_csv("forecast_revenue.csv")
+
+
+
+
+
+
+this code is a little bit of machine learning , in which we are doing 2 years prediction and saving it in csv using Prophet mibrary , machine learning , pls try to understand thi code this not a rocket science
+
+
+=================================================================================================================================================
+
+Create MARKDOWN CELl "### Ploting Forcaast" Press ESC 
+
+Siyar bhai isme mai 3 ### use krra hu , aap na ek n ek baar ## use krke dekhlena and uske baad # bar # lah kr dekhlena , heading bdi hoti hia bss ok 
+
+Create CODE CELL and use this code
+
+
+model.plot(forecast)
+plt.title("Apple Revenue Forecast ($M)")
+plt.savefig("Visuals/revenue_forecast.png")
+plt.show()
+
+
+
+seyar bhai isme na hr ek chez k bhut bda meaning hai , koi b word capital small mt krna jaise hai waise h krna wrna errors ka tufan aajyga apke pass
+
+NOW push this on github 
+
+
+
+run command in terminal  
+
+git add main.ipynb Visuals
+git commit -m "Predicting revenue 2 years Data and plotiing Graphs"
+git push -u origin main
+
+========================================================================================================================================
+
+Create MARKDOWN CELl "### Ploting Expence Prediction 2 years" Press ESC 
+
+
+
+
+
+
+# Prepare data for Prophet
+revenue_df = df[['Date', 'Revenue']].rename(columns={'Date': 'ds', 'Revenue': 'y'})
+# Forecast expenses with Prophet
+expenses_df = df[['Date', 'Expenses']].rename(columns={'Date': 'ds', 'Expenses': 'y'})
+
+# Train model
+model_exp = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False)
+model_exp.fit(expenses_df)
+
+# Forecast 8 quarters
+future_exp = model_exp.make_future_dataframe(periods=8, freq='Q')
+forecast_exp = model_exp.predict(future_exp)
+
+# Save forecast
+forecast_exp[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_csv("forecast_expenses.csv")
+
+# Plot forecast
+model_exp.plot(forecast_exp)
+plt.title("Apple Expenses Forecast ($M)")
+plt.savefig("Visuals/expenses_forecast.png")
+plt.show()
+
+
+
+
+Push this work on git hub 
+
+run command in terminal  
+
+git add .
+git commit -m "Predicting exoenses 2 years Data and plotiing Graphs"
+git push -u origin main
+
+
+
+==============================================================================================================================================
+
+Create MARDOEN CELL "### Check accuracy"
+
+Create CODE CEll and paste this or or type by your self 
+
+
+# Check accuracy (Mean Absolute Error for last 2 quarters)
+actual = revenue_df['y'][-2:]
+predicted = forecast['yhat'][-4:-2]
+mae = (actual - predicted).abs().mean()
+print(f"Mean Absolute Error (Revenue): ${mae:.2f}M")
+
+Push this work on git hub 
+
+git add .
+git commit -m "Checking Accuracy"
+git push -u origin main
+
+
+========================================================================================================================
+Create MARKDONWN cell "### Combining actual and forcaste data" Press ESC
+
+Creta CODE cell and ASTE THIS CODE OR type by your self fro practice 
+
+
+forecast_revenue = forecast[['ds', 'yhat']].rename(columns={'ds': 'Date', 'yhat': 'Forecast_Revenue'})
+forecast_expenses = forecast_exp[['ds', 'yhat']].rename(columns={'ds': 'Date', 'yhat': 'Forecast_Expenses'})
+
+combine_df = df.merge(forecast_revenue , on='Date' , how='left').merge(forecast_expenses, on='Date' , how='left')
+combine_df.to_csv("Combined_Financial_Forecast.csv")
+
+
+
+push this work in GitHub
+
+git add .
+git commit -m "Combining actual and forcaste data"
+git push -u origin main
+
+
+=====================================================================================================================
+
+Create MARKDOWEN cell "### Plottif Actual and Forcasting Graphs" Press ESC
+
+Create CODE cell and type or paste this code in it 
+
+
+# Load combined data
+df = pd.read_csv("Combined_Financial_Forecast.csv")
+df['Date'] = pd.to_datetime(df['Date'])
+
+# Plot actual vs. forecasted revenue
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=df, x='Date', y='Revenue', label='Actual Revenue ($M)')
+sns.lineplot(data=df, x='Date', y='Forecast_Revenue', label='Forecast Revenue ($M)', linestyle='--')
+plt.title("Actual vs. Forecasted Revenue (2024-2025)")
+plt.xticks(rotation=45)
+plt.savefig("Visuals/revenue_actual_vs_forecast.png")
+plt.show()
+
+
+# Plot actual vs. forecasted expenses
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=df, x='Date', y='Expenses', label='Actual Expenses ($M)')
+sns.lineplot(data=df, x='Date', y='Forecast_Expenses', label='Forecast Expenses ($M)', linestyle='--')
+plt.title("Actual vs. Forecasted Expenses (2024-2025)")
+plt.xticks(rotation=45)
+plt.savefig("Visuals/expenses_actual_vs_forecast.png")
+plt.show()
+
+
+# Plot revenue by quarter
+df['Quarter'] = df['Date'].dt.quarter
+sns.boxplot(x='Quarter', y='Revenue', data=df)
+plt.title("Revenue by Quarter")
+plt.savefig("Visuals/revenue_by_quarter.png")
+plt.show()
+
+
+
+# Insights
+print("Insights:")
+print("- Q4 (Dec 2024) revenue is highest ($124,300M) due to holiday sales.")
+print("- Expenses are steady, ranging from $14,288M to $15,516M.")
+print("- Forecasts are close to actuals due to limited data (5 quarters).")
+
+
+
+
+push this work in GitHub
+
+git add .
+git commit -m "Potting  actual and forcaste data"
+git push -u origin main
+
+
+=================================================================================================================================================
+
+Hogya bhai main kaam , abb dara datset ready krenge powerbi k liye ok , combine krenge 
+
+ab apke pass ek final dataset aagya hoga powerbi me dashboard creatin k liye mai qwuetion b de dunga power bi me kay kay question solve kre hai , ok agr itna kriya to bss bhut kuch krliy pne oir apke git hub me b sb kaam hmne turnt k turnt bhej b diya chek krlijiyega 
